@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "681975861990",
+    "project_id": "movai-b7f80",
+    "storage_bucket": "movai-b7f80.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:681975861990:android:b3cd1aa7e9df376c74a127",
+        "android_client_info": {
+          "package_name": "com.company.movai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "681975861990-620ckj4r2f9ta5bth6q71o0i321i68r7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.company.movai",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "681975861990-lok16elsogmd9d1po9o2tdvh01lep834.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCswZaTNO5Mc1BOvEmCEKAMrOKbOoU8CuU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "681975861990-lok16elsogmd9d1po9o2tdvh01lep834.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "681975861990-1pk9b2an35vvbhtpepqssp3t7bgf57j3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.company.movai"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
