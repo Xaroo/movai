@@ -19,17 +19,27 @@ const StartPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const screenWidth = Dimensions.get("window").width;
+
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged((user) => {
+      if (user) {
+        setIsLoggedIn(true);
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   const signUp = async () => {
     setLoading(true);
     try {
       await auth().createUserWithEmailAndPassword(email, password);
-      alert("Cheack your email!");
+      alert("Check your email!");
     } catch (e: any) {
       const err = e as FirebaseError;
-      alert("Registration failed" + err.message);
+      alert("Registration failed: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -39,17 +49,20 @@ const StartPage = () => {
     setLoading(true);
     try {
       await auth().signInWithEmailAndPassword(email, password);
+      setIsLoggedIn(true);
     } catch (e: any) {
       const err = e as FirebaseError;
-      alert("Login failed" + err.message);
+      alert("Login failed: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    // <Redirect href="/myMovies" />
+  if (isLoggedIn) {
+    return <Redirect href="/myMovies" />;
+  }
 
+  return (
     <View style={styles.container}>
       <View style={styles.circle} />
       <Image
@@ -124,6 +137,7 @@ const StartPage = () => {
     </View>
   );
 };
+
 export default StartPage;
 
 const styles = StyleSheet.create({

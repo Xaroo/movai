@@ -11,8 +11,8 @@ export default () => {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          height: 80,
-          paddingTop: 8,
+          height: 60,
+          paddingTop: 4,
           backgroundColor: "#664AD2",
         },
       }}
