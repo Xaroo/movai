@@ -5,6 +5,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Feather from "@expo/vector-icons/Feather";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { BottomTabBar } from "@react-navigation/bottom-tabs";
+import { Image, StyleSheet } from "react-native";
 
 export default () => {
   return (
@@ -20,7 +21,15 @@ export default () => {
       <Tabs.Screen
         name="myMovies"
         options={{
-          title: "My movies",
+          headerStyle: {
+            backgroundColor: "#282828",
+          },
+          headerTitle: () => (
+            <Image
+              style={styles.logo}
+              source={require("../../assets/images/Logo.png")}
+            />
+          ),
           tabBarIcon: ({ color }) => (
             <MaterialIcons size={25} name="movie" color={color} />
           ),
@@ -31,7 +40,15 @@ export default () => {
       <Tabs.Screen
         name="search"
         options={{
-          title: "Search",
+          headerStyle: {
+            backgroundColor: "#282828",
+          },
+          headerTitle: () => (
+            <Image
+              style={styles.logo}
+              source={require("../../assets/images/Logo.png")}
+            />
+          ),
           tabBarIcon: ({ color }) => (
             <MaterialIcons size={25} name="search" color={color} />
           ),
@@ -42,7 +59,15 @@ export default () => {
       <Tabs.Screen
         name="suggestions"
         options={{
-          title: "Suggestions",
+          headerStyle: {
+            backgroundColor: "#282828",
+          },
+          headerTitle: () => (
+            <Image
+              style={styles.logo}
+              source={require("../../assets/images/Logo.png")}
+            />
+          ),
           tabBarIcon: ({ color }) => (
             <Feather size={25} name="heart" color={color} />
           ),
@@ -53,7 +78,15 @@ export default () => {
       <Tabs.Screen
         name="statistics"
         options={{
-          title: "Statistics",
+          headerStyle: {
+            backgroundColor: "#282828",
+          },
+          headerTitle: () => (
+            <Image
+              style={styles.logo}
+              source={require("../../assets/images/Logo.png")}
+            />
+          ),
           tabBarIcon: ({ color }) => (
             <AntDesign size={25} name="linechart" color={color} />
           ),
@@ -64,3 +97,11 @@ export default () => {
     </Tabs>
   );
 };
+
+const styles = StyleSheet.create({
+  logo: {
+    width: 70,
+    height: 40,
+    alignSelf: "center",
+  },
+});

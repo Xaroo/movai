@@ -4,6 +4,7 @@ import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
 import { ActivityIndicator, View } from "react-native";
 import React from "react";
+import { AuthProvider } from "../app/AuthContext";
 
 const _layout = () => {
   const [initializing, setInitializing] = useState(true);
@@ -34,9 +35,11 @@ const _layout = () => {
     );
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <AuthProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+    </AuthProvider>
   );
 };
 

@@ -2,15 +2,16 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
 import auth from "@react-native-firebase/auth";
 import { Redirect } from "expo-router";
+import { useAuth } from "../AuthContext";
 
 const myMovies = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((user) => {
-      setIsLoggedIn(!!user);
+    const unsubscribe = auth().onAuthStateChanged((User) => {
+      setIsLoggedIn(!!User);
     });
-
     return unsubscribe;
   }, []);
 
@@ -27,8 +28,7 @@ const myMovies = () => {
   }
 
   return (
-    <View>
-      <Text>My movies</Text>
+    <View style={styles.container}>
       <TouchableOpacity style={styles.button} onPress={signOut}>
         <Text
           style={{
@@ -58,5 +58,9 @@ const styles = StyleSheet.create({
     margin: 10,
     alignSelf: "flex-end",
     justifyContent: "center",
+  },
+  container: {
+    backgroundColor: "#1A1A1A",
+    flex: 1,
   },
 });
