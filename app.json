@@ -2,6 +2,9 @@
   "expo": {
     "name": "movai2",
     "slug": "movai2",
+    "extra": {
+      "TMDB_API_KEY": "2c07d9671ecbd3dfb5f5b43f251b6c6b"
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
