@@ -21,38 +21,47 @@ const Suggestions = () => {
 
   const [recommendations, setRecommendations] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastSentMovies, setLastSentMovies] = useState<string | null>(null);
 
   const isFocused = useIsFocused();
   const { movies } = useAuth();
 
   useEffect(() => {
-    if (isFocused) {
-      fetch("http://192.168.100.40:5000/recommend", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_ratings: movies,
-        }),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            console.error("Błąd odpowiedzi:", response.statusText);
-            throw new Error("Błąd odpowiedzi z serwera");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setRecommendations(data);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error("Błąd podczas pobierania rekomendacji:", error);
-          setLoading(false);
-        });
+    if (!isFocused || !movies) return;
+
+    const currentMoviesString = JSON.stringify(movies);
+
+    if (currentMoviesString === lastSentMovies) {
+      // 👇 Jeśli nie ma zmian – nie rób nic
+      console.log("🎯 Brak zmian w movies – pomijam zapytanie.");
+      return;
     }
-  }, [isFocused]);
+
+    setLoading(true); // <- tylko jeśli naprawdę wysyłasz
+    fetch("http://192.168.100.40:5000/recommend", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_ratings: movies }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          console.error("Błąd odpowiedzi:", response.statusText);
+          throw new Error("Błąd odpowiedzi z serwera");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setRecommendations(data);
+        setLastSentMovies(currentMoviesString); // 👈 zapamiętaj wysłaną wersję
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Błąd podczas pobierania rekomendacji:", error);
+        setLoading(false);
+      });
+  }, [isFocused, movies]);
 
   if (loading) {
     return (

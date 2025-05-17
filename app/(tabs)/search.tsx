@@ -64,6 +64,7 @@ const Search = () => {
       alert("Ten film już istnieje w Twojej bazie filmów!");
       return;
     } else {
+      setRating(0);
       setSelectedMovie(movie);
       setModalVisible(true);
     }
