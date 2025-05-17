@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
+import { useAuth } from "../AuthContext";
 
 const Suggestions = () => {
   type Movie = {
@@ -22,6 +23,7 @@ const Suggestions = () => {
   const [loading, setLoading] = useState(true);
 
   const isFocused = useIsFocused();
+  const { movies } = useAuth();
 
   useEffect(() => {
     if (isFocused) {
@@ -31,9 +33,7 @@ const Suggestions = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_ratings: {
-            4233: 5, // przykładowy film ID 20 z oceną 5
-          },
+          user_ratings: movies,
         }),
       })
         .then((response) => {

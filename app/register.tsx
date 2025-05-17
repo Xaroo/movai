@@ -13,7 +13,7 @@ import {
 import React, { useState } from "react";
 import auth from "@react-native-firebase/auth";
 import { FirebaseError } from "firebase/app";
-import { database } from "../src/firebaseCofnig";
+import { database } from "../src/firebaseConfig";
 import { ref, get, set } from "firebase/database";
 
 const Register = () => {
