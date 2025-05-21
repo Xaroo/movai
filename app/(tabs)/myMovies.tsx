@@ -17,7 +17,7 @@ import { database } from "../../src/firebaseConfig";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w200";
 
 const MyMovies = () => {
-  const { movies, user, refreshMovies } = useAuth();
+  const { moviesRatings, user, refreshMovies } = useAuth();
   const [ratedMovies, setRatedMovies] = useState<any[]>([]);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -25,18 +25,18 @@ const MyMovies = () => {
   const [rating, setRating] = useState<number>(0);
 
   useEffect(() => {
-    if (!movies) return;
+    if (!moviesRatings) return;
 
     const allMovies: any[] = moviesDataRaw as any[];
-    const filtered = Object.keys(movies)
+    const filtered = Object.keys(moviesRatings)
       .map((id) => {
         const movie = allMovies.find((m) => m.id === Number(id));
-        return movie ? { ...movie, rating: movies[Number(id)] } : null;
+        return movie ? { ...movie, rating: moviesRatings[Number(id)] } : null;
       })
       .filter(Boolean);
 
     setRatedMovies(filtered);
-  }, [movies]);
+  }, [moviesRatings]);
 
   const handleCardPress = (movie: any) => {
     setSelectedMovie(movie);

@@ -42,8 +42,8 @@ const Search = () => {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [rating, setRating] = useState<number>(0);
-  const { movies } = useAuth() as {
-    movies: { [key: string]: number } | null;
+  const { moviesRatings } = useAuth() as {
+    moviesRatings: { [key: string]: number } | null;
   };
   const { user, refreshMovies } = useAuth();
 
@@ -60,7 +60,7 @@ const Search = () => {
   }, [query]);
 
   const openModal = (movie: Movie) => {
-    if (movies?.hasOwnProperty(movie.id)) {
+    if (moviesRatings?.hasOwnProperty(movie.id)) {
       alert("Ten film już istnieje w Twojej bazie filmów!");
       return;
     } else {
@@ -77,7 +77,10 @@ const Search = () => {
           database,
           `users/${user.uid}/movies/${selectedMovie.id}`
         );
-        await set(movieRef, rating);
+        await set(movieRef, {
+          rating: rating,
+          rated_at: new Date().toISOString(),
+        });
         await refreshMovies();
         setModalVisible(false);
       } catch (error) {

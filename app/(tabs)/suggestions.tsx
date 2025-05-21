@@ -29,7 +29,7 @@ const Suggestions = () => {
   const [hasMore, setHasMore] = useState(true);
 
   const isFocused = useIsFocused();
-  const { movies } = useAuth();
+  const { moviesRatings } = useAuth();
 
   const getPosterPath = (id: number) => {
     const found = (moviesDataRaw as any[]).find((m) => m.id === id);
@@ -37,16 +37,16 @@ const Suggestions = () => {
   };
 
   useEffect(() => {
-    if (isFocused && movies) {
+    if (isFocused && moviesRatings) {
       setRecommendations([]);
       setPage(0);
       setHasMore(true);
       fetchRecommendations(0, true);
     }
-  }, [isFocused, movies]);
+  }, [isFocused, moviesRatings]);
 
   const fetchRecommendations = async (pageToFetch: number, initial = false) => {
-    if (!movies || (!hasMore && !initial) || loadingMore) return;
+    if (!moviesRatings || (!hasMore && !initial) || loadingMore) return;
 
     if (initial) {
       setLoading(true);
@@ -59,7 +59,7 @@ const Suggestions = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_ratings: movies,
+          user_ratings: moviesRatings,
           page: pageToFetch,
           per_page: 5,
         }),

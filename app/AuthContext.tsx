@@ -6,15 +6,16 @@ import React, {
   ReactNode,
 } from "react";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import "@react-native-firebase/app"; // <-- To ważne!
-import { ref, get, set } from "firebase/database";
-import { database } from "../src/firebaseConfig"; // Upewnij się, że ścieżka jest poprawna
+import "@react-native-firebase/app";
+import { ref, get } from "firebase/database";
+import { database } from "../src/firebaseConfig";
 
 // Typ kontekstu
 type AuthContextType = {
   user: FirebaseAuthTypes.User | null;
   loading: boolean;
-  movies: { [key: number]: number } | null;
+  moviesRatings: { [movieId: number]: number } | null;
+  moviesRatedAt: { [movieId: number]: string } | null;
   refreshMovies: () => Promise<void>;
 };
 
@@ -22,7 +23,8 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  movies: null,
+  moviesRatings: null,
+  moviesRatedAt: null,
   refreshMovies: async () => {},
 });
 
@@ -30,36 +32,80 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [movies, setMovies] = useState<{ [key: number]: number } | null>(null);
+  const [moviesRatings, setMoviesRatings] = useState<{
+    [movieId: number]: number;
+  } | null>(null);
+  const [moviesRatedAt, setMoviesRatedAt] = useState<{
+    [movieId: number]: string;
+  } | null>(null);
+
+  const extractMoviesData = (moviesRaw: any) => {
+    const ratings: { [id: number]: number } = {};
+    const ratedAt: { [id: number]: string } = {};
+
+    if (moviesRaw && typeof moviesRaw === "object") {
+      Object.entries(moviesRaw).forEach(([movieIdStr, value]) => {
+        const movieId = Number(movieIdStr);
+
+        if (value && typeof value === "object" && !Array.isArray(value)) {
+          const rating = (value as { rating?: unknown }).rating;
+          const ratedDate = (value as { rated_at?: unknown }).rated_at;
+
+          if (typeof rating === "number") {
+            ratings[movieId] = rating;
+          }
+
+          if (typeof ratedDate === "string") {
+            ratedAt[movieId] = ratedDate;
+          }
+        } else if (typeof value === "number") {
+          // obsługa starego formatu
+          ratings[movieId] = value;
+        }
+      });
+    }
+
+    setMoviesRatings(Object.keys(ratings).length > 0 ? ratings : null);
+    setMoviesRatedAt(Object.keys(ratedAt).length > 0 ? ratedAt : null);
+  };
+
   const refreshMovies = async () => {
     if (user) {
       const userRef = ref(database, `users/${user.uid}`);
       const snapshot = await get(userRef);
       const userData = snapshot.val();
-      setMovies(userData?.movies || null);
+      extractMoviesData(userData?.movies || null);
     }
   };
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
-      const userRef = ref(database, `users/${firebaseUser?.uid}`);
-      const snapshot = await get(userRef);
-      const userData = snapshot.val();
+      if (firebaseUser) {
+        const userRef = ref(database, `users/${firebaseUser.uid}`);
+        const snapshot = await get(userRef);
+        const userData = snapshot.val();
 
-      setMovies(userData?.movies || null); // Ustawienie filmów użytkownika
-      setUser(firebaseUser);
+        extractMoviesData(userData?.movies || null);
+        setUser(firebaseUser);
+      } else {
+        setUser(null);
+        setMoviesRatings(null);
+        setMoviesRatedAt(null);
+      }
       setLoading(false);
     });
 
-    return unsubscribe; // wyrejestrowanie listenera przy unmount
+    return unsubscribe;
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, movies, refreshMovies }}>
+    <AuthContext.Provider
+      value={{ user, loading, moviesRatings, moviesRatedAt, refreshMovies }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Hook do pobierania użytkownika
+// Hook
 export const useAuth = () => useContext(AuthContext);
