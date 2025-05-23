@@ -7,9 +7,10 @@ import {
   Dimensions,
   TouchableOpacity,
 } from "react-native";
-import { BarChart, PieChart } from "react-native-chart-kit";
+
 import { useAuth } from "../AuthContext";
 import moviesDataRaw from "../../assets/csv/popular_movies.json";
+import { BarChart, PieChart } from "react-native-gifted-charts";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -61,9 +62,7 @@ const Statistics = () => {
   useEffect(() => {
     if (!moviesRatings) return;
 
-    // Histogram ocen
-    const histogram = Array(11).fill(0); // 0, 0.5, ..., 5
-
+    const histogram = Array(11).fill(0);
     const genreStats: { [genre: string]: { sum: number; count: number } } = {};
 
     Object.entries(moviesRatings).forEach(([movieIdStr, value]) => {
@@ -74,11 +73,9 @@ const Statistics = () => {
           : value;
       const matchedMovie = moviesData.find((m) => m.id === movieId);
 
-      // Histogram
       const index = Math.round(rating * 2);
       histogram[index]++;
 
-      // Średnie ocen wg gatunku
       if (matchedMovie?.genres) {
         matchedMovie.genres.forEach((genre) => {
           if (!genreStats[genre]) genreStats[genre] = { sum: 0, count: 0 };
@@ -101,7 +98,6 @@ const Statistics = () => {
     setGenreAverages(genreAveragesList);
   }, [moviesRatings]);
 
-  // Efekt liczący filmy obejrzane w miesiącach wybranego roku
   useEffect(() => {
     if (!moviesRatedAt) return;
 
@@ -111,7 +107,7 @@ const Statistics = () => {
       const date = new Date(dateStr);
       const year = date.getFullYear();
       if (year === selectedYear) {
-        const month = date.getMonth(); // 0-11
+        const month = date.getMonth();
         counts[month]++;
       }
     });
@@ -126,83 +122,105 @@ const Statistics = () => {
   return (
     <View style={styles.containerMain}>
       <ScrollView style={styles.container}>
-        <Text style={styles.title}>Rozkład ocen</Text>
-        <BarChart
-          data={{
-            labels: [
-              "0",
-              "0.5",
-              "1",
-              "1.5",
-              "2",
-              "2.5",
-              "3",
-              "3.5",
-              "4",
-              "4.5",
-              "5",
-            ],
-            datasets: [{ data: ratingsHistogram }],
-          }}
-          width={screenWidth - 20}
-          height={220}
-          yAxisLabel=""
-          yAxisSuffix=""
-          chartConfig={chartConfig}
-          style={styles.chart}
-        />
-
-        <Text style={styles.title}>Średnia ocen wg gatunku</Text>
-        <PieChart
-          data={genreAverages.map((genre, index) => ({
-            name: genre.name,
-            population: parseFloat((genre.ratingSum / genre.count).toFixed(2)),
-            color: chartColors[index % chartColors.length],
-            legendFontColor: "#fff",
-            legendFontSize: 12,
-          }))}
-          width={screenWidth - 20}
-          height={220}
-          chartConfig={chartConfig}
-          accessor={"population"}
-          backgroundColor={"transparent"}
-          paddingLeft={"10"}
-          absolute
-        />
-
-        <Text style={styles.title}>
-          Ilość obejrzanych filmów na miesiąc w roku
-        </Text>
-
-        {/* Wybór roku */}
-        <View style={styles.yearSelector}>
-          <TouchableOpacity
-            style={styles.yearButton}
-            onPress={() => setSelectedYear((y) => y - 1)}
-          >
-            <Text style={styles.yearButtonText}>◀</Text>
-          </TouchableOpacity>
-          <Text style={styles.yearText}>{selectedYear}</Text>
-          <TouchableOpacity
-            style={styles.yearButton}
-            onPress={() => setSelectedYear((y) => y + 1)}
-          >
-            <Text style={styles.yearButtonText}>▶</Text>
-          </TouchableOpacity>
+        <View style={styles.chartContainer}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Rozkład ocen</Text>
+          </View>
+          <View style={{ paddingHorizontal: 10 }}>
+            <BarChart
+              barWidth={18}
+              noOfSections={5}
+              barBorderRadius={4}
+              frontColor="#7b62e6"
+              data={ratingsHistogram.map((value, i) => ({
+                value,
+                label: (i * 0.5).toString(),
+              }))}
+              yAxisColor="#555"
+              xAxisColor="#555"
+              yAxisTextStyle={{ color: "#fff" }}
+              xAxisLabelTextStyle={{ color: "#fff", fontSize: 10 }}
+              spacing={10}
+              width={Dimensions.get("window").width - 80}
+            />
+          </View>
         </View>
 
-        <BarChart
-          data={{
-            labels: monthNames,
-            datasets: [{ data: moviesPerMonth }],
-          }}
-          width={screenWidth - 20}
-          height={220}
-          yAxisLabel=""
-          yAxisSuffix=""
-          chartConfig={chartConfig}
-          style={styles.chart}
-        />
+        <View style={styles.chartContainer}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Średnia ocen wg gatunku</Text>
+          </View>
+          <View style={{ alignItems: "center" }}>
+            <PieChart
+              data={genreAverages.map((genre, index) => ({
+                value: parseFloat((genre.ratingSum / genre.count).toFixed(2)),
+                color: chartColors[index % chartColors.length],
+              }))}
+              showText={false}
+              radius={80}
+              strokeColor={"#1A1A1A"}
+              focusOnPress
+            />
+          </View>
+          <View style={styles.legendContainer}>
+            {genreAverages.map((genre, index) => (
+              <View key={index} style={styles.legendItem}>
+                <View
+                  style={[
+                    styles.legendColor,
+                    {
+                      backgroundColor: chartColors[index % chartColors.length],
+                    },
+                  ]}
+                />
+                <Text style={styles.legendText}>
+                  {genre.name} ({(genre.ratingSum / genre.count).toFixed(2)})
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.chartContainer}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>
+              Ilość obejrzanych filmów na miesiąc
+            </Text>
+          </View>
+          <View style={styles.yearSelector}>
+            <TouchableOpacity
+              style={styles.yearButton}
+              onPress={() => setSelectedYear((y) => y - 1)}
+            >
+              <Text style={styles.yearButtonText}>◀</Text>
+            </TouchableOpacity>
+            <Text style={styles.yearText}>{selectedYear}</Text>
+            <TouchableOpacity
+              style={styles.yearButton}
+              onPress={() => setSelectedYear((y) => y + 1)}
+            >
+              <Text style={styles.yearButtonText}>▶</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ paddingHorizontal: 10 }}>
+            <BarChart
+              barWidth={16}
+              noOfSections={5}
+              barBorderRadius={4}
+              frontColor="#5e44c9"
+              data={moviesPerMonth.map((value, i) => ({
+                value,
+                label: monthNames[i],
+              }))}
+              yAxisColor="#555"
+              xAxisColor="#555"
+              yAxisTextStyle={{ color: "#fff" }}
+              xAxisLabelTextStyle={{ color: "#fff", fontSize: 10 }}
+              spacing={10}
+              width={Dimensions.get("window").width - 80}
+            />
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -211,6 +229,20 @@ const Statistics = () => {
 export default Statistics;
 
 const styles = StyleSheet.create({
+  titleContainer: {
+    backgroundColor: "#585858",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 10,
+    borderBottomColor: "#555",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  chartContainer: {
+    backgroundColor: "#2A2A2A",
+    paddingBottom: 20,
+    marginBottom: 10,
+  },
   containerMain: {
     backgroundColor: "#1A1A1A",
     flex: 1,
@@ -219,17 +251,35 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#1A1A1A",
     flex: 1,
-    paddingHorizontal: 10,
   },
   title: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 5,
+    textAlign: "center",
   },
-  chart: {
-    borderRadius: 16,
+  legendContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginTop: 10,
     marginBottom: 20,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 5,
+    marginVertical: 3,
+  },
+  legendColor: {
+    width: 12,
+    height: 12,
+    marginRight: 6,
+    borderRadius: 3,
+  },
+  legendText: {
+    color: "#fff",
+    fontSize: 12,
   },
   yearSelector: {
     flexDirection: "row",
@@ -255,14 +305,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
-const chartConfig = {
-  backgroundGradientFrom: "#2A2A2A",
-  backgroundGradientTo: "#383838",
-  color: (opacity = 1) => `rgba(73, 52, 153, ${opacity})`,
-  labelColor: () => "#fff",
-  decimalPlaces: 1,
-};
 
 const chartColors = [
   "#493499",
