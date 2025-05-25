@@ -17,6 +17,7 @@ type AuthContextType = {
   moviesRatings: { [movieId: number]: number } | null;
   moviesRatedAt: { [movieId: number]: string } | null;
   refreshMovies: () => Promise<void>;
+  logout: () => Promise<void>;
 };
 
 // Tworzenie kontekstu
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextType>({
   moviesRatings: null,
   moviesRatedAt: null,
   refreshMovies: async () => {},
+  logout: async () => {},
 });
 
 // Provider
@@ -38,6 +40,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [moviesRatedAt, setMoviesRatedAt] = useState<{
     [movieId: number]: string;
   } | null>(null);
+
+  const logout = async () => {
+    try {
+      await auth().signOut();
+      setUser(null);
+      setMoviesRatings(null);
+      setMoviesRatedAt(null);
+    } catch (error) {
+      console.error("Błąd podczas wylogowywania:", error);
+    }
+  };
 
   const extractMoviesData = (moviesRaw: any) => {
     const ratings: { [id: number]: number } = {};
@@ -100,7 +113,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, moviesRatings, moviesRatedAt, refreshMovies }}
+      value={{
+        user,
+        loading,
+        moviesRatings,
+        moviesRatedAt,
+        refreshMovies,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

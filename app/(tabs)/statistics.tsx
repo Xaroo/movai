@@ -6,11 +6,13 @@ import {
   ScrollView,
   Dimensions,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 
 import { useAuth } from "../AuthContext";
 import moviesDataRaw from "../../assets/csv/popular_movies.json";
 import { BarChart, PieChart } from "react-native-gifted-charts";
+import { Redirect } from "expo-router";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -47,7 +49,7 @@ const monthNames = [
 ];
 
 const Statistics = () => {
-  const { moviesRatings, moviesRatedAt, loading } = useAuth();
+  const { moviesRatings, moviesRatedAt, loading, user } = useAuth();
   const [ratingsHistogram, setRatingsHistogram] = useState<number[]>([]);
   const [genreAverages, setGenreAverages] = useState<
     { name: string; ratingSum: number; count: number }[]
@@ -117,6 +119,18 @@ const Statistics = () => {
 
   if (loading) {
     return <Text style={{ color: "white", padding: 20 }}>Ładowanie...</Text>;
+  }
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#664AD2" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return <Redirect href="/login" />;
   }
 
   return (

@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import moviesDataRaw from "../../assets/csv/popular_movies.json"; // <- Upewnij się, że ten plik istnieje
@@ -14,6 +15,7 @@ import StarRating from "react-native-star-rating-widget";
 import { useAuth } from "../AuthContext"; // <- Upewnij się, że masz ten kontekst
 import { database } from "../../src/firebaseConfig"; // <- Upewnij się, że masz ten plik
 import { ref, set } from "firebase/database";
+import { Redirect } from "expo-router";
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w200";
 
@@ -45,7 +47,7 @@ const Search = () => {
   const { moviesRatings } = useAuth() as {
     moviesRatings: { [key: string]: number } | null;
   };
-  const { user, refreshMovies } = useAuth();
+  const { user, loading, refreshMovies } = useAuth();
 
   useEffect(() => {
     if (query.length >= 3) {
@@ -88,6 +90,18 @@ const Search = () => {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#664AD2" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return <Redirect href="/login" />;
+  }
 
   return (
     <View style={styles.container}>

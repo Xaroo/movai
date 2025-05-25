@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
@@ -13,11 +14,12 @@ import moviesDataRaw from "../../assets/csv/popular_movies.json";
 import StarRating from "react-native-star-rating-widget";
 import { ref, set } from "firebase/database";
 import { database } from "../../src/firebaseConfig";
+import { Redirect } from "expo-router";
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w200";
 
 const MyMovies = () => {
-  const { moviesRatings, user, refreshMovies } = useAuth();
+  const { moviesRatings, user, refreshMovies, loading } = useAuth();
   const [ratedMovies, setRatedMovies] = useState<any[]>([]);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -79,6 +81,18 @@ const MyMovies = () => {
       </TouchableOpacity>
     );
   };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#664AD2" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return <Redirect href="/login" />;
+  }
 
   return (
     <View style={styles.container}>

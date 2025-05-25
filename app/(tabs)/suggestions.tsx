@@ -10,6 +10,7 @@ import {
 import { useIsFocused } from "@react-navigation/native";
 import { useAuth } from "../AuthContext";
 import moviesDataRaw from "../../assets/csv/popular_movies.json";
+import { Redirect } from "expo-router";
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w200";
 
@@ -24,12 +25,12 @@ const Suggestions = () => {
 
   const [recommendations, setRecommendations] = useState<Movie[]>([]);
   const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
   const isFocused = useIsFocused();
-  const { moviesRatings } = useAuth();
+  const { user, loading, moviesRatings } = useAuth();
 
   const getPosterPath = (id: number) => {
     const found = (moviesDataRaw as any[]).find((m) => m.id === id);
@@ -49,7 +50,7 @@ const Suggestions = () => {
     if (!moviesRatings || (!hasMore && !initial) || loadingMore) return;
 
     if (initial) {
-      setLoading(true);
+      setLoadingRecommendations(true);
     } else {
       setLoadingMore(true);
     }
@@ -81,7 +82,7 @@ const Suggestions = () => {
     } catch (error) {
       console.error("❌ Błąd przy pobieraniu:", error);
     } finally {
-      setLoading(false);
+      setLoadingRecommendations(false);
       setLoadingMore(false);
     }
   };
@@ -115,7 +116,19 @@ const Suggestions = () => {
     );
   };
 
-  if (loading && page === 0) {
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#664AD2" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return <Redirect href="/login" />;
+  }
+
+  if (loadingRecommendations && page === 0) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#fff" />
