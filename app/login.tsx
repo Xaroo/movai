@@ -13,12 +13,15 @@ import {
 import React, { useState, useEffect } from "react";
 import auth from "@react-native-firebase/auth";
 import { FirebaseError } from "firebase/app";
+import Modal from "react-native-modal";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showError, setShowError] = useState(false);
 
   const screenWidth = Dimensions.get("window").width;
 
@@ -38,7 +41,25 @@ const Login = () => {
       setIsLoggedIn(true);
     } catch (e: any) {
       const err = e as FirebaseError;
-      alert("Login failed: " + err.message);
+      let message = "Something went wrong. Please try again.";
+      switch (err.code) {
+        case "auth/invalid-email":
+          message = "The email address is not valid.";
+          break;
+        case "auth/user-not-found":
+          message = "No account found with this email.";
+          break;
+        case "auth/wrong-password":
+          message = "Incorrect password. Please try again.";
+          break;
+        case "auth/invalid-credential":
+          message =
+            "Invalid credentials. Please check your email and password.";
+          break;
+      }
+
+      setErrorMessage(message);
+      setShowError(true);
     } finally {
       setLoading(false);
     }
@@ -104,6 +125,18 @@ const Login = () => {
           </>
         )}
       </KeyboardAvoidingView>
+      <Modal isVisible={showError} onBackdropPress={() => setShowError(false)}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Login Failed</Text>
+          <Text style={styles.modalMessage}>{errorMessage}</Text>
+          <TouchableOpacity
+            style={styles.modalButton}
+            onPress={() => setShowError(false)}
+          >
+            <Text style={styles.modalButtonText}>OK</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -185,5 +218,38 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#9281D8",
     fontWeight: "bold",
+  },
+  modalContent: {
+    backgroundColor: "#282828",
+    padding: 25,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalTitle: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    fontFamily: "LatoRegular",
+  },
+  modalMessage: {
+    color: "#CCCCCC",
+    fontSize: 16,
+    textAlign: "center",
+    fontFamily: "LatoRegular",
+  },
+  modalButton: {
+    marginTop: 20,
+    backgroundColor: "#493499",
+    paddingHorizontal: 25,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  modalButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: "LatoRegular",
   },
 });

@@ -58,6 +58,7 @@ const Statistics = () => {
   const [moviesPerMonth, setMoviesPerMonth] = useState<number[]>(
     Array(12).fill(0)
   );
+  const [genreColors, setGenreColors] = useState<string[]>([]);
 
   const moviesData = moviesDataRaw as Movie[];
 
@@ -98,7 +99,19 @@ const Statistics = () => {
     );
 
     setGenreAverages(genreAveragesList);
+    setGenreColors(generateUniqueColors(genreAveragesList.length));
   }, [moviesRatings]);
+
+  const generateUniqueColors = (count: number): string[] => {
+    const colors = new Set<string>();
+    while (colors.size < count) {
+      const color = `#${Math.floor(Math.random() * 0xffffff)
+        .toString(16)
+        .padStart(6, "0")}`;
+      colors.add(color);
+    }
+    return Array.from(colors);
+  };
 
   useEffect(() => {
     if (!moviesRatedAt) return;
@@ -168,7 +181,7 @@ const Statistics = () => {
             <PieChart
               data={genreAverages.map((genre, index) => ({
                 value: parseFloat((genre.ratingSum / genre.count).toFixed(2)),
-                color: chartColors[index % chartColors.length],
+                color: genreColors[index],
               }))}
               showText={false}
               radius={80}
@@ -182,9 +195,7 @@ const Statistics = () => {
                 <View
                   style={[
                     styles.legendColor,
-                    {
-                      backgroundColor: chartColors[index % chartColors.length],
-                    },
+                    { backgroundColor: genreColors[index] },
                   ]}
                 />
                 <Text style={styles.legendText}>
